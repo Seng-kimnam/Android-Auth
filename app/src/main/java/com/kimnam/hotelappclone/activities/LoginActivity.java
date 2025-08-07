@@ -2,10 +2,13 @@ package com.kimnam.hotelappclone.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,7 +27,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private EditText etUsername , etPassword;
     private Button btnLogin;
-
+    private LinearLayout llSignUp;
     private ProgressBar progressBar;
     private AuthRepository authRepository;
     @Override
@@ -32,6 +35,8 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
+        initViews();
+        setupClickListeners();
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -75,6 +80,62 @@ public class LoginActivity extends AppCompatActivity {
                 Intent intent = new Intent(LoginActivity.this , MainActivity.class);
                 startActivity(intent);
                 finish();
+            }
+        });
+    }
+    private void initViews(){
+        llSignUp = findViewById(R.id.llSignUp);
+        progressBar = findViewById(R.id.progress_bar);
+    }
+    private void navigateToRegister() {
+        Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+
+        // Optional: Pass some data to register activity
+        intent.putExtra("from_login", true);
+
+        startActivity(intent);
+
+        // Optional: Add custom transition animation
+        overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+
+        // Optional: If you don't want users to go back to login after clicking register
+        // finish();
+    }
+    private void handleSignUpClick() {
+        try {
+            // Optional: Show loading and disable button to prevent double clicks
+            if (progressBar != null) {
+                progressBar.setVisibility(View.VISIBLE);
+            }
+            llSignUp.setEnabled(false);
+
+            // Add small delay for better UX (optional)
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    navigateToRegister();
+
+                    // Re-enable button and hide loading
+                    if (progressBar != null) {
+                        progressBar.setVisibility(View.GONE);
+                    }
+                    llSignUp.setEnabled(true);
+                }
+            }, 300); // 300ms delay
+
+        } catch (Exception e) {
+            Toast.makeText(LoginActivity.this, "Unable to open registration", Toast.LENGTH_SHORT).show();
+            if (progressBar != null) {
+                progressBar.setVisibility(View.GONE);
+            }
+            llSignUp.setEnabled(true);
+        }
+    }
+    private void setupClickListeners() {
+        llSignUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                handleSignUpClick();
             }
         });
     }
